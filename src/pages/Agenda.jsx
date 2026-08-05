@@ -9,11 +9,12 @@ import { usePresidentes } from '../hooks/usePresidentes'
 import { useCitasPorFecha } from '../hooks/useCitas'
 import { useAuth } from '../context/AuthContext'
 import { construirTextoAgendaWhatsApp, copiarAlPortapapeles } from '../lib/whatsapp'
+import { proximoDiaEntrevistas } from '../lib/constants'
 
 export default function Agenda() {
   const navigate = useNavigate()
   const { isAdmin } = useAuth()
-  const [fecha, setFecha] = useState(format(new Date(), 'yyyy-MM-dd'))
+  const [fecha, setFecha] = useState(() => format(proximoDiaEntrevistas(), 'yyyy-MM-dd'))
   const [copiado, setCopiado] = useState(false)
 
   const { data: presidentes, isLoading: cargandoPresidentes } = usePresidentes({ soloActivos: true })

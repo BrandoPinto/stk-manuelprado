@@ -36,3 +36,14 @@ export function formatHora(hora) {
   // hora viene como "HH:MM:SS" desde Supabase (tipo time)
   return hora?.slice(0, 5) ?? hora
 }
+
+/**
+ * Día por defecto al abrir la Agenda: las entrevistas son los martes,
+ * así que si hoy es martes se prioriza hoy; si no, el próximo martes.
+ */
+export function proximoDiaEntrevistas(desde = new Date()) {
+  const dia = new Date(desde)
+  const diasHastaMartes = (2 - dia.getDay() + 7) % 7
+  dia.setDate(dia.getDate() + diasHastaMartes)
+  return dia
+}
