@@ -106,8 +106,29 @@ create policy "profiles_insert_admin" on public.profiles
 create policy "profiles_update_admin" on public.profiles
   for update using (public.is_admin());
 
+-- Cada usuario puede actualizar su propio perfil (nombre, email).
+-- El trigger protect_profile_role (abajo) impide que se cambie su propio rol.
+drop policy if exists "profiles_update_self" on public.profiles;
+create policy "profiles_update_self" on public.profiles
+  for update using (auth.uid() = id) with check (auth.uid() = id);
+
 create policy "profiles_delete_admin" on public.profiles
   for delete using (public.is_admin());
+
+create or replace function public.protect_profile_role()
+returns trigger as $$
+begin
+  if not public.is_admin() then
+    new.role := old.role;
+  end if;
+  return new;
+end;
+$$ language plpgsql security definer;
+
+drop trigger if exists protect_profile_role on public.profiles;
+create trigger protect_profile_role
+  before update on public.profiles
+  for each row execute procedure public.protect_profile_role();
 
 -- PRESIDENTES: lectura para autenticados, escritura solo admin
 create policy "presidentes_select_authenticated" on public.presidentes

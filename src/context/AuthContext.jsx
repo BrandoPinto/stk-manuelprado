@@ -8,7 +8,7 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  const loadProfile = useCallback(async (userId) => {
+  const loadProfile = useCallback(async (userId, email) => {
     if (!userId) {
       setProfile(null)
       return
@@ -19,18 +19,34 @@ export function AuthProvider({ children }) {
       .eq('id', userId)
       .single()
 
-    if (!error) setProfile(data)
+    if (error) return
+    setProfile(data)
+
+    // Si el correo de Auth cambió (ej. tras confirmar un cambio de email),
+    // mantenemos sincronizada la copia en profiles.
+    if (email && data.email !== email) {
+      const { error: syncError } = await supabase
+        .from('profiles')
+        .update({ email })
+        .eq('id', userId)
+      if (!syncError) setProfile((p) => (p ? { ...p, email } : p))
+    }
   }, [])
+
+  const refreshProfile = useCallback(() => {
+    if (session?.user) loadProfile(session.user.id, session.user.email)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, loadProfile])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
-      loadProfile(session?.user?.id).finally(() => setLoading(false))
+      loadProfile(session?.user?.id, session?.user?.email).finally(() => setLoading(false))
     })
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
-      loadProfile(session?.user?.id)
+      loadProfile(session?.user?.id, session?.user?.email)
     })
 
     return () => listener.subscription.unsubscribe()
@@ -53,6 +69,7 @@ export function AuthProvider({ children }) {
     loading,
     signIn,
     signOut,
+    refreshProfile,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

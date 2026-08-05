@@ -8,6 +8,7 @@ import Semana from './pages/Semana'
 import Historial from './pages/Historial'
 import Usuarios from './pages/Usuarios'
 import Presidentes from './pages/Presidentes'
+import Perfil from './pages/Perfil'
 
 export default function App() {
   return (
@@ -67,6 +68,14 @@ export default function App() {
         element={
           <ProtectedRoute adminOnly>
             <Usuarios />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/perfil"
+        element={
+          <ProtectedRoute>
+            <Perfil />
           </ProtectedRoute>
         }
       />

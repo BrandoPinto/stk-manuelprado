@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { ChevronLeft, LogOut } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { ChevronLeft, LogOut, UserCircle } from 'lucide-react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import ConfirmDialog from '../ui/ConfirmDialog'
 
 export default function Header({ title, subtitle, onBack, right }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const { signOut } = useAuth()
   const [confirmandoSalida, setConfirmandoSalida] = useState(false)
 
@@ -34,6 +35,15 @@ export default function Header({ title, subtitle, onBack, right }) {
       </div>
       <div className="flex items-center gap-1">
         {right}
+        {location.pathname !== '/perfil' && (
+          <button
+            onClick={() => navigate('/perfil')}
+            className="tap-scale flex h-9 w-9 items-center justify-center rounded-full text-ink-500 active:bg-ink-100"
+            aria-label="Mi perfil"
+          >
+            <UserCircle size={19} />
+          </button>
+        )}
         <button
           onClick={() => setConfirmandoSalida(true)}
           className="tap-scale flex h-9 w-9 items-center justify-center rounded-full text-ink-500 active:bg-ink-100"
