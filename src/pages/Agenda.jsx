@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
 import { Settings, Plus, Copy, Check } from 'lucide-react'
@@ -17,11 +17,19 @@ export default function Agenda() {
   const [fecha, setFecha] = useState(() => format(proximoDiaEntrevistas(), 'yyyy-MM-dd'))
   const [copiado, setCopiado] = useState(false)
 
-  const { data: presidentes, isLoading: cargandoPresidentes } = usePresidentes({ soloActivos: true })
+  const { data: todosPresidentes, isLoading: cargandoPresidentes } = usePresidentes()
   const { data: citas, isLoading: cargandoCitas } = useCitasPorFecha(fecha)
 
   const citasPorPresidente = (presidenteId) =>
     (citas ?? []).filter((c) => c.presidente_id === presidenteId)
+
+  // Mostrar presidentes activos + los inactivos que igual tengan
+  // citas agendadas ese día, para no perderlas de vista.
+  const presidentes = useMemo(() => {
+    const lista = todosPresidentes ?? []
+    return lista.filter((p) => p.activo || citasPorPresidente(p.id).length > 0)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [todosPresidentes, citas])
 
   const irACrear = () => {
     navigate('/nueva-cita', { state: { fecha } })

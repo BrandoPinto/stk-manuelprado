@@ -1,5 +1,6 @@
 import { User, CalendarX } from 'lucide-react'
 import Card from '../ui/Card'
+import Badge from '../ui/Badge'
 import HorarioSlot from './HorarioSlot'
 import { formatHora } from '../../lib/constants'
 
@@ -13,6 +14,7 @@ export default function PresidenteCard({ presidente, citas, onEditar }) {
           <User size={16} />
         </span>
         <h3 className="font-display text-[15px] font-semibold text-ink-900">{presidente.nombre}</h3>
+        {!presidente.activo && <Badge tone="neutral">Inactivo</Badge>}
         {ordenadas.length > 0 && (
           <span className="ml-auto text-[12.5px] font-medium text-ink-400">
             {ordenadas.length} {ordenadas.length === 1 ? 'cita' : 'citas'}

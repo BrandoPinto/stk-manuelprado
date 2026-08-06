@@ -15,18 +15,31 @@ export default function CitaForm({
   submitting,
   errorMsg,
 }) {
+  const presidenteInicialId = initialValues?.presidente_id ?? presidentes?.[0]?.id ?? ''
+  const presidenteInicial = presidentes?.find((p) => p.id === presidenteInicialId)
+
   const [form, setForm] = useState({
     nombre_persona: initialValues?.nombre_persona ?? '',
     barrio: initialValues?.barrio ?? '',
     motivo: initialValues?.motivo ?? '',
-    modalidad: initialValues?.modalidad ?? 'presencial',
-    presidente_id: initialValues?.presidente_id ?? presidentes?.[0]?.id ?? '',
+    modalidad: initialValues?.modalidad ?? presidenteInicial?.modalidad_default ?? 'presencial',
+    presidente_id: presidenteInicialId,
     fecha: initialValues?.fecha ?? '',
     hora: initialValues?.hora ?? HORARIOS[0],
     celular: (initialValues?.celular ?? '').replace(PREFIJO_CELULAR, ''),
   })
 
   const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
+
+  const updatePresidente = (e) => {
+    const id = e.target.value
+    const presidente = presidentes?.find((p) => p.id === id)
+    setForm((f) => ({
+      ...f,
+      presidente_id: id,
+      modalidad: presidente?.modalidad_default ?? f.modalidad,
+    }))
+  }
 
   const updateCelular = (e) => {
     const digits = e.target.value.replace(/\D/g, '').slice(0, 9)
@@ -117,7 +130,7 @@ export default function CitaForm({
       )}
 
       <Field label="Presidente">
-        <Select required value={form.presidente_id} onChange={update('presidente_id')}>
+        <Select required value={form.presidente_id} onChange={updatePresidente}>
           {presidentes?.map((p) => (
             <option key={p.id} value={p.id}>
               {p.nombre}
