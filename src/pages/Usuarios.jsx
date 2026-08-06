@@ -1,14 +1,15 @@
 import { useState } from 'react'
-import { Plus, X, Trash2, Shield, UserCircle } from 'lucide-react'
+import { Plus, Trash2, Shield, UserCircle } from 'lucide-react'
 import AppLayout from '../components/layout/AppLayout'
 import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
+import Modal from '../components/ui/Modal'
 import { Field, Input, Select } from '../components/ui/Input'
 import { useUsuarios } from '../hooks/useUsuarios'
 import { useAuth } from '../context/AuthContext'
 
-function NuevoUsuarioSheet({ onClose, onSave, saving, errorMsg }) {
+function NuevoUsuarioModal({ onClose, onSave, saving, errorMsg }) {
   const [nombre, setNombre] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -20,45 +21,37 @@ function NuevoUsuarioSheet({ onClose, onSave, saving, errorMsg }) {
   }
 
   return (
-    <div className="fixed inset-0 z-30 flex items-end justify-center bg-black/40">
-      <div className="max-h-[85vh] w-full max-w-app overflow-y-auto rounded-t-2xl bg-white p-4 pb-6 safe-bottom">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-[16px] font-semibold text-ink-900">Nuevo usuario</h2>
-          <button onClick={onClose} className="tap-scale rounded-full p-1.5 text-ink-500 active:bg-ink-100">
-            <X size={20} />
-          </button>
-        </div>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Field label="Nombre">
-            <Input required value={nombre} onChange={(e) => setNombre(e.target.value)} />
-          </Field>
-          <Field label="Correo">
-            <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-          </Field>
-          <Field label="Contraseña temporal">
-            <Input
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </Field>
-          <Field label="Rol">
-            <Select value={role} onChange={(e) => setRole(e.target.value)}>
-              <option value="secretario">Secretario</option>
-              <option value="admin">Admin</option>
-            </Select>
-          </Field>
-          {errorMsg && (
-            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">{errorMsg}</p>
-          )}
-          <Button type="submit" loading={saving} className="w-full">
-            Crear usuario
-          </Button>
-        </form>
-      </div>
-    </div>
+    <Modal open title="Nuevo usuario" onClose={onClose}>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <Field label="Nombre">
+          <Input required value={nombre} onChange={(e) => setNombre(e.target.value)} />
+        </Field>
+        <Field label="Correo">
+          <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+        </Field>
+        <Field label="Contraseña temporal">
+          <Input
+            type="password"
+            required
+            minLength={6}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </Field>
+        <Field label="Rol">
+          <Select value={role} onChange={(e) => setRole(e.target.value)}>
+            <option value="secretario">Secretario</option>
+            <option value="admin">Admin</option>
+          </Select>
+        </Field>
+        {errorMsg && (
+          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">{errorMsg}</p>
+        )}
+        <Button type="submit" loading={saving} className="w-full">
+          Crear usuario
+        </Button>
+      </form>
+    </Modal>
   )
 }
 
@@ -133,7 +126,7 @@ export default function Usuarios() {
       </div>
 
       {abierto && (
-        <NuevoUsuarioSheet
+        <NuevoUsuarioModal
           onClose={() => setAbierto(false)}
           onSave={handleCrear}
           saving={crear.isPending}

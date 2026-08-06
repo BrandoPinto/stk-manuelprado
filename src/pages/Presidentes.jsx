@@ -1,13 +1,14 @@
 import { useState } from 'react'
-import { Plus, User, Power, Pencil, X } from 'lucide-react'
+import { Plus, User, Power, Pencil } from 'lucide-react'
 import AppLayout from '../components/layout/AppLayout'
 import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
+import Modal from '../components/ui/Modal'
 import { Field, Input, Select } from '../components/ui/Input'
 import { usePresidentes } from '../hooks/usePresidentes'
 
-function PresidenteFormSheet({ initial, onClose, onSave, saving }) {
+function PresidenteFormModal({ initial, onClose, onSave, saving }) {
   const [nombre, setNombre] = useState(initial?.nombre ?? '')
   const [modalidad, setModalidad] = useState(initial?.modalidad_default ?? 'presencial')
 
@@ -17,32 +18,27 @@ function PresidenteFormSheet({ initial, onClose, onSave, saving }) {
   }
 
   return (
-    <div className="fixed inset-0 z-30 flex items-end justify-center bg-black/40">
-      <div className="max-h-[85vh] w-full max-w-app overflow-y-auto rounded-t-2xl bg-white p-4 pb-6 safe-bottom">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-[16px] font-semibold text-ink-900">
-            {initial ? 'Editar presidente' : 'Nuevo presidente'}
-          </h2>
-          <button onClick={onClose} className="tap-scale rounded-full p-1.5 text-ink-500 active:bg-ink-100">
-            <X size={20} />
-          </button>
-        </div>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Field label="Nombre">
-            <Input required value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Presidente Ramírez" />
-          </Field>
-          <Field label="Modalidad por defecto">
-            <Select value={modalidad} onChange={(e) => setModalidad(e.target.value)}>
-              <option value="presencial">Presencial</option>
-              <option value="virtual">Virtual</option>
-            </Select>
-          </Field>
-          <Button type="submit" loading={saving} className="w-full">
-            Guardar
-          </Button>
-        </form>
-      </div>
-    </div>
+    <Modal open title={initial ? 'Editar presidente' : 'Nuevo presidente'} onClose={onClose}>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <Field label="Nombre">
+          <Input
+            required
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            placeholder="Presidente Ramírez"
+          />
+        </Field>
+        <Field label="Modalidad por defecto">
+          <Select value={modalidad} onChange={(e) => setModalidad(e.target.value)}>
+            <option value="presencial">Presencial</option>
+            <option value="virtual">Virtual</option>
+          </Select>
+        </Field>
+        <Button type="submit" loading={saving} className="w-full">
+          Guardar
+        </Button>
+      </form>
+    </Modal>
   )
 }
 
@@ -122,7 +118,7 @@ export default function Presidentes() {
       </div>
 
       {abierto && (
-        <PresidenteFormSheet
+        <PresidenteFormModal
           initial={editando === 'nuevo' ? null : editando}
           onClose={() => setEditando(null)}
           onSave={handleSave}
