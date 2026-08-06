@@ -43,7 +43,7 @@ export default function CalendarPicker({ value, onSelect, onClose }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-app rounded-t-2xl bg-white p-4 pb-6 safe-bottom"
+        className="max-h-[85vh] w-full max-w-app overflow-y-auto rounded-t-2xl bg-white p-4 pb-6 safe-bottom"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">

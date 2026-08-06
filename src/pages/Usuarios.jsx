@@ -21,7 +21,7 @@ function NuevoUsuarioSheet({ onClose, onSave, saving, errorMsg }) {
 
   return (
     <div className="fixed inset-0 z-30 flex items-end justify-center bg-black/40">
-      <div className="w-full max-w-app rounded-t-2xl bg-white p-4 pb-6 safe-bottom">
+      <div className="max-h-[85vh] w-full max-w-app overflow-y-auto rounded-t-2xl bg-white p-4 pb-6 safe-bottom">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-[16px] font-semibold text-ink-900">Nuevo usuario</h2>
           <button onClick={onClose} className="tap-scale rounded-full p-1.5 text-ink-500 active:bg-ink-100">
