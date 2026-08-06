@@ -2,21 +2,26 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { format, subMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Search } from 'lucide-react'
+import { Search, History as HistoryIcon } from 'lucide-react'
 import AppLayout from '../components/layout/AppLayout'
 import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
+import Button from '../components/ui/Button'
 import { Input, Select } from '../components/ui/Input'
 import { useCitasPorRango } from '../hooks/useCitas'
 import { usePresidentes } from '../hooks/usePresidentes'
 import { formatHora } from '../lib/constants'
 
+const RANGO_INICIAL_MESES = 3
+const RANGO_INCREMENTO_MESES = 3
+
 export default function Historial() {
   const navigate = useNavigate()
   const hoy = format(new Date(), 'yyyy-MM-dd')
-  const desde = format(subMonths(new Date(), 3), 'yyyy-MM-dd')
+  const [mesesAtras, setMesesAtras] = useState(RANGO_INICIAL_MESES)
+  const desde = format(subMonths(new Date(), mesesAtras), 'yyyy-MM-dd')
 
-  const { data: citas, isLoading } = useCitasPorRango(desde, hoy)
+  const { data: citas, isLoading, isFetching } = useCitasPorRango(desde, hoy)
   const { data: presidentes } = usePresidentes()
 
   const [busqueda, setBusqueda] = useState('')
@@ -96,6 +101,18 @@ export default function Historial() {
           </Card>
         ))}
       </div>
+
+      {!isLoading && (
+        <Button
+          variant="secondary"
+          icon={HistoryIcon}
+          loading={isFetching}
+          onClick={() => setMesesAtras((m) => m + RANGO_INCREMENTO_MESES)}
+          className="mt-3 w-full"
+        >
+          Cargar más antiguo
+        </Button>
+      )}
     </AppLayout>
   )
 }

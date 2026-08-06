@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Plus, Trash2, Shield, UserCircle } from 'lucide-react'
+import { Plus, Trash2, Shield, ShieldPlus, ShieldMinus, UserCircle } from 'lucide-react'
 import AppLayout from '../components/layout/AppLayout'
 import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import Modal from '../components/ui/Modal'
+import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { Field, Input, Select } from '../components/ui/Input'
 import { useUsuarios } from '../hooks/useUsuarios'
 import { useAuth } from '../context/AuthContext'
@@ -56,10 +57,12 @@ function NuevoUsuarioModal({ onClose, onSave, saving, errorMsg }) {
 }
 
 export default function Usuarios() {
-  const { data: usuarios, isLoading, crear, eliminar } = useUsuarios()
+  const { data: usuarios, isLoading, crear, actualizarRol, eliminar } = useUsuarios()
   const { user } = useAuth()
   const [abierto, setAbierto] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
+  const [usuarioAEliminar, setUsuarioAEliminar] = useState(null)
+  const [usuarioACambiarRol, setUsuarioACambiarRol] = useState(null)
 
   const handleCrear = async (values) => {
     setErrorMsg('')
@@ -71,10 +74,15 @@ export default function Usuarios() {
     }
   }
 
-  const handleEliminar = (u) => {
-    if (u.id === user.id) return
-    if (!window.confirm(`¿Eliminar a ${u.nombre}?`)) return
-    eliminar.mutate(u.id)
+  const handleEliminar = () => {
+    eliminar.mutate(usuarioAEliminar.id)
+    setUsuarioAEliminar(null)
+  }
+
+  const handleCambiarRol = () => {
+    const nuevoRol = usuarioACambiarRol.role === 'admin' ? 'secretario' : 'admin'
+    actualizarRol.mutate({ id: usuarioACambiarRol.id, role: nuevoRol })
+    setUsuarioACambiarRol(null)
   }
 
   return (
@@ -113,13 +121,22 @@ export default function Usuarios() {
               </div>
             </div>
             {u.id !== user.id && (
-              <button
-                onClick={() => handleEliminar(u)}
-                className="tap-scale flex h-9 w-9 items-center justify-center rounded-full text-red-500 active:bg-red-50"
-                aria-label="Eliminar"
-              >
-                <Trash2 size={16} />
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setUsuarioACambiarRol(u)}
+                  className="tap-scale flex h-9 w-9 items-center justify-center rounded-full text-ink-500 active:bg-ink-100"
+                  aria-label={u.role === 'admin' ? 'Quitar admin' : 'Hacer admin'}
+                >
+                  {u.role === 'admin' ? <ShieldMinus size={16} /> : <ShieldPlus size={16} />}
+                </button>
+                <button
+                  onClick={() => setUsuarioAEliminar(u)}
+                  className="tap-scale flex h-9 w-9 items-center justify-center rounded-full text-red-500 active:bg-red-50"
+                  aria-label="Eliminar"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
             )}
           </Card>
         ))}
@@ -133,6 +150,37 @@ export default function Usuarios() {
           errorMsg={errorMsg}
         />
       )}
+
+      <ConfirmDialog
+        open={!!usuarioAEliminar}
+        icon={Trash2}
+        title={`¿Eliminar a ${usuarioAEliminar?.nombre}?`}
+        description="Esta acción no se puede deshacer."
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        onConfirm={handleEliminar}
+        onCancel={() => setUsuarioAEliminar(null)}
+      />
+
+      <ConfirmDialog
+        open={!!usuarioACambiarRol}
+        icon={usuarioACambiarRol?.role === 'admin' ? ShieldMinus : ShieldPlus}
+        variant="primary"
+        title={
+          usuarioACambiarRol?.role === 'admin'
+            ? `¿Quitarle el rol de admin a ${usuarioACambiarRol?.nombre}?`
+            : `¿Hacer admin a ${usuarioACambiarRol?.nombre}?`
+        }
+        description={
+          usuarioACambiarRol?.role === 'admin'
+            ? 'Pasará a ser secretario, sin acceso a gestión de usuarios ni presidentes.'
+            : 'Va a tener acceso completo, incluyendo gestión de usuarios y presidentes.'
+        }
+        confirmLabel="Confirmar"
+        cancelLabel="Cancelar"
+        onConfirm={handleCambiarRol}
+        onCancel={() => setUsuarioACambiarRol(null)}
+      />
     </AppLayout>
   )
 }

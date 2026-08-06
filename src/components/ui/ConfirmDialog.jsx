@@ -1,6 +1,13 @@
 import { createPortal } from 'react-dom'
 import Button from './Button'
 
+const iconTones = {
+  danger: 'bg-red-50 text-red-600',
+  primary: 'bg-brand-50 text-brand-600',
+  secondary: 'bg-ink-100 text-ink-600',
+  ghost: 'bg-ink-100 text-ink-600',
+}
+
 export default function ConfirmDialog({
   open,
   title,
@@ -24,7 +31,9 @@ export default function ConfirmDialog({
         onClick={(e) => e.stopPropagation()}
       >
         {Icon && (
-          <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600">
+          <span
+            className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full ${iconTones[variant] ?? iconTones.danger}`}
+          >
             <Icon size={22} />
           </span>
         )}

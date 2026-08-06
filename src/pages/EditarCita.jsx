@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { Trash2 } from 'lucide-react'
 import AppLayout from '../components/layout/AppLayout'
 import CitaForm from '../components/agenda/CitaForm'
+import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { usePresidentes } from '../hooks/usePresidentes'
 import { useCitaMutations } from '../hooks/useCitas'
 import { supabase } from '../lib/supabaseClient'
@@ -15,6 +17,7 @@ export default function EditarCita() {
   const { data: presidentes } = usePresidentes({ soloActivos: true })
   const { actualizar, eliminar } = useCitaMutations()
   const [errorMsg, setErrorMsg] = useState('')
+  const [confirmandoEliminar, setConfirmandoEliminar] = useState(false)
 
   const { data: cita, isLoading } = useQuery({
     queryKey: ['cita', id],
@@ -37,7 +40,7 @@ export default function EditarCita() {
   }
 
   const handleEliminar = async () => {
-    if (!window.confirm('¿Eliminar esta cita? Esta acción no se puede deshacer.')) return
+    setConfirmandoEliminar(false)
     try {
       await eliminar.mutateAsync(id)
       navigate('/agenda')
@@ -62,9 +65,20 @@ export default function EditarCita() {
         presidentes={presidentes}
         initialValues={{ ...cita, hora: formatHora(cita.hora) }}
         onSubmit={handleSubmit}
-        onEliminar={handleEliminar}
+        onEliminar={() => setConfirmandoEliminar(true)}
         submitting={actualizar.isPending || eliminar.isPending}
         errorMsg={errorMsg}
+      />
+
+      <ConfirmDialog
+        open={confirmandoEliminar}
+        icon={Trash2}
+        title="¿Eliminar esta cita?"
+        description="Esta acción no se puede deshacer."
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        onConfirm={handleEliminar}
+        onCancel={() => setConfirmandoEliminar(false)}
       />
     </AppLayout>
   )
