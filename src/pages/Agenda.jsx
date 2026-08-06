@@ -5,6 +5,7 @@ import { Settings, Plus, Copy, Check } from 'lucide-react'
 import AppLayout from '../components/layout/AppLayout'
 import DaySelector from '../components/agenda/DaySelector'
 import PresidenteCard from '../components/agenda/PresidenteCard'
+import ErrorState from '../components/ui/ErrorState'
 import { usePresidentes } from '../hooks/usePresidentes'
 import { useCitasPorFecha } from '../hooks/useCitas'
 import { useAuth } from '../context/AuthContext'
@@ -17,8 +18,18 @@ export default function Agenda() {
   const [fecha, setFecha] = useState(() => format(proximoDiaEntrevistas(), 'yyyy-MM-dd'))
   const [copiado, setCopiado] = useState(false)
 
-  const { data: todosPresidentes, isLoading: cargandoPresidentes } = usePresidentes()
-  const { data: citas, isLoading: cargandoCitas } = useCitasPorFecha(fecha)
+  const {
+    data: todosPresidentes,
+    isLoading: cargandoPresidentes,
+    isError: errorPresidentes,
+    refetch: refetchPresidentes,
+  } = usePresidentes()
+  const {
+    data: citas,
+    isLoading: cargandoCitas,
+    isError: errorCitas,
+    refetch: refetchCitas,
+  } = useCitasPorFecha(fecha)
 
   const citasPorPresidente = (presidenteId) =>
     (citas ?? []).filter((c) => c.presidente_id === presidenteId)
@@ -47,6 +58,7 @@ export default function Agenda() {
   }
 
   const cargando = cargandoPresidentes || cargandoCitas
+  const conError = errorPresidentes || errorCitas
 
   return (
     <AppLayout
@@ -76,19 +88,30 @@ export default function Agenda() {
     >
       <DaySelector fecha={fecha} onChange={setFecha} />
 
-      {cargando && (
+      {cargando && !conError && (
         <div className="flex justify-center py-10">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-600 border-t-transparent" />
         </div>
       )}
 
-      {!cargando && presidentes?.length === 0 && (
+      {conError && (
+        <ErrorState
+          message="No se pudo cargar la agenda. Revisa tu conexión."
+          onRetry={() => {
+            refetchPresidentes()
+            refetchCitas()
+          }}
+        />
+      )}
+
+      {!cargando && !conError && presidentes?.length === 0 && (
         <p className="mt-8 text-center text-sm text-ink-500">
           No hay presidentes activos. Agrégalos desde la sección de Presidentes.
         </p>
       )}
 
       {!cargando &&
+        !conError &&
         presidentes?.map((presidente) => (
           <PresidenteCard
             key={presidente.id}

@@ -5,6 +5,7 @@ import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import Modal from '../components/ui/Modal'
+import ErrorState from '../components/ui/ErrorState'
 import { Field, Input, Select } from '../components/ui/Input'
 import { usePresidentes } from '../hooks/usePresidentes'
 
@@ -43,7 +44,7 @@ function PresidenteFormModal({ initial, onClose, onSave, saving }) {
 }
 
 export default function Presidentes() {
-  const { data: presidentes, isLoading, crear, actualizar } = usePresidentes()
+  const { data: presidentes, isLoading, isError, refetch, crear, actualizar } = usePresidentes()
   const [editando, setEditando] = useState(null) // null = cerrado, 'nuevo', o objeto presidente
   const abierto = editando !== null
 
@@ -74,14 +75,19 @@ export default function Presidentes() {
         </button>
       }
     >
-      {isLoading && (
+      {isLoading && !isError && (
         <div className="flex justify-center py-10">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-600 border-t-transparent" />
         </div>
       )}
 
+      {isError && (
+        <ErrorState message="No se pudo cargar la lista de presidentes." onRetry={refetch} />
+      )}
+
       <div className="flex flex-col gap-2">
-        {presidentes?.map((p) => (
+        {!isError &&
+          presidentes?.map((p) => (
           <Card key={p.id} className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-ink-900 text-white">

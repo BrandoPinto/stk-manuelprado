@@ -5,6 +5,7 @@ import { es } from 'date-fns/locale'
 import AppLayout from '../components/layout/AppLayout'
 import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
+import ErrorState from '../components/ui/ErrorState'
 import { useCitasPorRango } from '../hooks/useCitas'
 import { formatHora } from '../lib/constants'
 import { ChevronLeft, ChevronRight, User } from 'lucide-react'
@@ -20,7 +21,7 @@ export default function Semana() {
   const fechaInicio = format(dias[0], 'yyyy-MM-dd')
   const fechaFin = format(dias[dias.length - 1], 'yyyy-MM-dd')
 
-  const { data: citas, isLoading } = useCitasPorRango(fechaInicio, fechaFin)
+  const { data: citas, isLoading, isError, refetch } = useCitasPorRango(fechaInicio, fechaFin)
 
   const citasPorDia = useMemo(() => {
     const map = {}
@@ -62,13 +63,18 @@ export default function Semana() {
         </button>
       </div>
 
-      {isLoading && (
+      {isLoading && !isError && (
         <div className="flex justify-center py-10">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-600 border-t-transparent" />
         </div>
       )}
 
+      {isError && (
+        <ErrorState message="No se pudo cargar la semana. Revisa tu conexión." onRetry={refetch} />
+      )}
+
       {!isLoading &&
+        !isError &&
         dias.map((d) => {
           const key = format(d, 'yyyy-MM-dd')
           const lista = citasPorDia[key] ?? []

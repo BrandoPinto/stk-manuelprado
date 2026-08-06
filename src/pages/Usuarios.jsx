@@ -6,6 +6,7 @@ import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import Modal from '../components/ui/Modal'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
+import ErrorState from '../components/ui/ErrorState'
 import { Field, Input, Select } from '../components/ui/Input'
 import { useUsuarios } from '../hooks/useUsuarios'
 import { useAuth } from '../context/AuthContext'
@@ -57,7 +58,7 @@ function NuevoUsuarioModal({ onClose, onSave, saving, errorMsg }) {
 }
 
 export default function Usuarios() {
-  const { data: usuarios, isLoading, crear, actualizarRol, eliminar } = useUsuarios()
+  const { data: usuarios, isLoading, isError, refetch, crear, actualizarRol, eliminar } = useUsuarios()
   const { user } = useAuth()
   const [abierto, setAbierto] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
@@ -99,14 +100,19 @@ export default function Usuarios() {
         </button>
       }
     >
-      {isLoading && (
+      {isLoading && !isError && (
         <div className="flex justify-center py-10">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-600 border-t-transparent" />
         </div>
       )}
 
+      {isError && (
+        <ErrorState message="No se pudo cargar la lista de usuarios." onRetry={refetch} />
+      )}
+
       <div className="flex flex-col gap-2">
-        {usuarios?.map((u) => (
+        {!isError &&
+          usuarios?.map((u) => (
           <Card key={u.id} className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-ink-100 text-ink-600">

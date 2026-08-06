@@ -7,6 +7,7 @@ import AppLayout from '../components/layout/AppLayout'
 import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
+import ErrorState from '../components/ui/ErrorState'
 import { Input, Select } from '../components/ui/Input'
 import { useCitasPorRango } from '../hooks/useCitas'
 import { usePresidentes } from '../hooks/usePresidentes'
@@ -21,7 +22,7 @@ export default function Historial() {
   const [mesesAtras, setMesesAtras] = useState(RANGO_INICIAL_MESES)
   const desde = format(subMonths(new Date(), mesesAtras), 'yyyy-MM-dd')
 
-  const { data: citas, isLoading, isFetching } = useCitasPorRango(desde, hoy)
+  const { data: citas, isLoading, isFetching, isError, refetch } = useCitasPorRango(desde, hoy)
   const { data: presidentes } = usePresidentes()
 
   const [busqueda, setBusqueda] = useState('')
@@ -72,18 +73,23 @@ export default function Historial() {
         </div>
       </div>
 
-      {isLoading && (
+      {isLoading && !isError && (
         <div className="flex justify-center py-10">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-600 border-t-transparent" />
         </div>
       )}
 
-      {!isLoading && filtradas.length === 0 && (
+      {isError && (
+        <ErrorState message="No se pudo cargar el historial. Revisa tu conexión." onRetry={refetch} />
+      )}
+
+      {!isLoading && !isError && filtradas.length === 0 && (
         <p className="mt-8 text-center text-sm text-ink-500">No se encontraron citas.</p>
       )}
 
       <div className="flex flex-col gap-2">
-        {filtradas.map((c) => (
+        {!isError &&
+          filtradas.map((c) => (
           <Card
             key={c.id}
             className="tap-scale cursor-pointer"
@@ -102,7 +108,7 @@ export default function Historial() {
         ))}
       </div>
 
-      {!isLoading && (
+      {!isLoading && !isError && (
         <Button
           variant="secondary"
           icon={HistoryIcon}
