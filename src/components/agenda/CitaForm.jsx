@@ -145,7 +145,7 @@ export default function CitaForm({
         </Field>
         <Field label="Hora">
           <Select required value={form.hora} onChange={update('hora')}>
-            {HORARIOS.map((h) => (
+            {(HORARIOS.includes(form.hora) ? HORARIOS : [form.hora, ...HORARIOS]).map((h) => (
               <option key={h} value={h}>
                 {h}
               </option>

@@ -1,10 +1,6 @@
 // Horarios disponibles por defecto para agendar entrevistas.
 // Ajusta este arreglo según el horario real de tu estaca.
-export const HORARIOS = [
-  '07:00', '07:30', '08:00', '08:30',
-  '09:00', '09:30', '10:00', '10:30',
-  '19:00', '19:30', '20:00', '20:30', '21:00',
-]
+export const HORARIOS = ['18:30', '19:00', '19:30', '20:00', '20:30', '21:00']
 
 export const DIAS_SEMANA_LABEL = {
   0: 'Domingo',
