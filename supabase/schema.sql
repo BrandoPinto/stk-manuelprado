@@ -73,7 +73,10 @@ begin
   );
   return new;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
+
+-- Solo debe dispararse vía trigger, nunca llamarse directo por un usuario.
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
@@ -88,13 +91,15 @@ alter table public.presidentes enable row level security;
 alter table public.citas enable row level security;
 
 -- Helper: saber si el usuario actual es admin
+-- (se deja ejecutable por anon/authenticated: las políticas RLS la
+-- necesitan así para poder evaluarse)
 create or replace function public.is_admin()
 returns boolean as $$
   select exists (
     select 1 from public.profiles
     where id = auth.uid() and role = 'admin'
   );
-$$ language sql security definer stable;
+$$ language sql security definer stable set search_path = public;
 
 -- PROFILES: cualquier usuario autenticado puede leer, solo admin escribe
 create policy "profiles_select_authenticated" on public.profiles
@@ -123,7 +128,10 @@ begin
   end if;
   return new;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
+
+-- Solo debe dispararse vía trigger, nunca llamarse directo por un usuario.
+revoke execute on function public.protect_profile_role() from public, anon, authenticated;
 
 drop trigger if exists protect_profile_role on public.profiles;
 create trigger protect_profile_role
