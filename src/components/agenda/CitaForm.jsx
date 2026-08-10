@@ -117,7 +117,6 @@ export default function CitaForm({
             <input
               type="tel"
               inputMode="numeric"
-              required
               pattern="\d{9}"
               maxLength={9}
               value={form.celular}
