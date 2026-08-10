@@ -64,6 +64,7 @@ export default function Usuarios() {
   const [errorMsg, setErrorMsg] = useState('')
   const [usuarioAEliminar, setUsuarioAEliminar] = useState(null)
   const [usuarioACambiarRol, setUsuarioACambiarRol] = useState(null)
+  const [accionError, setAccionError] = useState('')
 
   const handleCrear = async (values) => {
     setErrorMsg('')
@@ -76,13 +77,20 @@ export default function Usuarios() {
   }
 
   const handleEliminar = () => {
-    eliminar.mutate(usuarioAEliminar.id)
+    setAccionError('')
+    eliminar.mutate(usuarioAEliminar.id, {
+      onError: (err) => setAccionError(err.message),
+    })
     setUsuarioAEliminar(null)
   }
 
   const handleCambiarRol = () => {
+    setAccionError('')
     const nuevoRol = usuarioACambiarRol.role === 'admin' ? 'secretario' : 'admin'
-    actualizarRol.mutate({ id: usuarioACambiarRol.id, role: nuevoRol })
+    actualizarRol.mutate(
+      { id: usuarioACambiarRol.id, role: nuevoRol },
+      { onError: (err) => setAccionError(err.message) }
+    )
     setUsuarioACambiarRol(null)
   }
 
@@ -108,6 +116,10 @@ export default function Usuarios() {
 
       {isError && (
         <ErrorState message="No se pudo cargar la lista de usuarios." onRetry={refetch} />
+      )}
+
+      {accionError && (
+        <p className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">{accionError}</p>
       )}
 
       <div className="flex flex-col gap-2">
