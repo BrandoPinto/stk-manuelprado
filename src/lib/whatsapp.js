@@ -24,13 +24,13 @@ export function construirTextoAgendaWhatsApp(fecha, presidentes, citasPorPreside
       lineas.push('_Sin citas agendadas_')
     } else {
       citas.forEach((c) => {
-        const modalidadIcono = c.modalidad === 'virtual' ? '💻' : '🏠'
+        const modalidadLabel = c.modalidad === 'virtual' ? 'Virtual' : 'Presencial'
         let linea = `🕐 ${formatHora(c.hora)} – ${c.nombre_persona}`
         if (c.barrio) linea += ` (${c.barrio})`
-        linea += ` ${modalidadIcono}`
+        linea += ` · ${modalidadLabel}`
         if (c.modalidad === 'virtual' && c.celular) linea += ` ${c.celular}`
         lineas.push(linea)
-        if (c.motivo) lineas.push(`     📝 ${c.motivo}`)
+        if (c.motivo) lineas.push(`     ${c.motivo}`)
       })
     }
 
