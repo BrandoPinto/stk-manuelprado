@@ -1,11 +1,12 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { format } from 'date-fns'
 import { Settings, Plus, Copy, Check } from 'lucide-react'
 import AppLayout from '../components/layout/AppLayout'
 import DaySelector from '../components/agenda/DaySelector'
 import PresidenteCard from '../components/agenda/PresidenteCard'
 import ErrorState from '../components/ui/ErrorState'
+import Toast from '../components/ui/Toast'
 import { usePresidentes } from '../hooks/usePresidentes'
 import { useCitasPorFecha } from '../hooks/useCitas'
 import { useAuth } from '../context/AuthContext'
@@ -14,9 +15,18 @@ import { proximoDiaEntrevistas } from '../lib/constants'
 
 export default function Agenda() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { isAdmin } = useAuth()
   const [fecha, setFecha] = useState(() => format(proximoDiaEntrevistas(), 'yyyy-MM-dd'))
   const [copiado, setCopiado] = useState(false)
+  const [toastMsg, setToastMsg] = useState(() => location.state?.toast ?? null)
+
+  useEffect(() => {
+    if (location.state?.toast) {
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const {
     data: todosPresidentes,
@@ -128,6 +138,8 @@ export default function Agenda() {
       >
         <Plus size={26} strokeWidth={2.5} />
       </button>
+
+      <Toast message={toastMsg} onDone={() => setToastMsg(null)} />
     </AppLayout>
   )
 }

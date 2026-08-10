@@ -27,7 +27,7 @@ export default function NuevaCita() {
     setErrorMsg('')
     try {
       await crear.mutateAsync({ ...form, creado_por: user?.id })
-      navigate('/agenda')
+      navigate('/agenda', { state: { toast: 'Cita creada' } })
     } catch (err) {
       setErrorMsg(err.message)
     }

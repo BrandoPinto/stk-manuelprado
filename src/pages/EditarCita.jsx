@@ -33,7 +33,7 @@ export default function EditarCita() {
     setErrorMsg('')
     try {
       await actualizar.mutateAsync({ id, ...form })
-      navigate('/agenda')
+      navigate('/agenda', { state: { toast: 'Cita actualizada' } })
     } catch (err) {
       setErrorMsg(err.message)
     }
@@ -43,7 +43,7 @@ export default function EditarCita() {
     setConfirmandoEliminar(false)
     try {
       await eliminar.mutateAsync(id)
-      navigate('/agenda')
+      navigate('/agenda', { state: { toast: 'Cita eliminada' } })
     } catch (err) {
       setErrorMsg(err.message)
     }
