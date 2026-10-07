@@ -26,6 +26,12 @@ export const PREFIJO_CELULAR = '+51'
 // Aparece en el encabezado y pie de los PDF de programas
 export const NOMBRE_ESTACA = 'Estaca Manuel Prado'
 
+export const ROLES = {
+  admin: 'Admin',
+  secretario: 'Secretario',
+  lector: 'Lector',
+}
+
 export const TIPOS_REUNION = [
   'Consejo de Estaca',
   'Consejo de Obispos',

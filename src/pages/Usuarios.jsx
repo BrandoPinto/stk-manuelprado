@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Trash2, Shield, ShieldPlus, ShieldMinus, UserCircle } from 'lucide-react'
+import { Plus, Trash2, Shield, ShieldCheck, Eye, UserCircle } from 'lucide-react'
 import AppLayout from '../components/layout/AppLayout'
 import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
@@ -10,6 +10,15 @@ import ErrorState from '../components/ui/ErrorState'
 import { Field, Input, Select } from '../components/ui/Input'
 import { useUsuarios } from '../hooks/useUsuarios'
 import { useAuth } from '../context/AuthContext'
+import { ROLES } from '../lib/constants'
+
+const DESCRIPCION_ROL = {
+  admin: 'Tendrá acceso completo, incluyendo la gestión de usuarios y presidentes.',
+  secretario: 'Podrá crear y editar citas y programas, sin acceso a usuarios ni presidentes.',
+  lector: 'Solo podrá consultar la información; no podrá crear, editar ni eliminar nada.',
+}
+
+const ICONOS_ROL = { admin: Shield, secretario: UserCircle, lector: Eye }
 
 function NuevoUsuarioModal({ onClose, onSave, saving, errorMsg }) {
   const [nombre, setNombre] = useState('')
@@ -42,7 +51,8 @@ function NuevoUsuarioModal({ onClose, onSave, saving, errorMsg }) {
         </Field>
         <Field label="Rol">
           <Select value={role} onChange={(e) => setRole(e.target.value)}>
-            <option value="secretario">Secretario</option>
+            <option value="secretario">Secretario (puede crear y editar)</option>
+            <option value="lector">Lector (solo puede ver)</option>
             <option value="admin">Admin</option>
           </Select>
         </Field>
@@ -86,9 +96,8 @@ export default function Usuarios() {
 
   const handleCambiarRol = () => {
     setAccionError('')
-    const nuevoRol = usuarioACambiarRol.role === 'admin' ? 'secretario' : 'admin'
     actualizarRol.mutate(
-      { id: usuarioACambiarRol.id, role: nuevoRol },
+      { id: usuarioACambiarRol.id, role: usuarioACambiarRol.nuevoRol },
       { onError: (err) => setAccionError(err.message) }
     )
     setUsuarioACambiarRol(null)
@@ -128,25 +137,33 @@ export default function Usuarios() {
           <Card key={u.id} className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-ink-100 text-ink-600">
-                {u.role === 'admin' ? <Shield size={16} /> : <UserCircle size={18} />}
+                {(() => {
+                  const Icono = ICONOS_ROL[u.role] ?? UserCircle
+                  return <Icono size={17} />
+                })()}
               </span>
               <div>
                 <p className="text-[14px] font-semibold text-ink-900">{u.nombre}</p>
                 <p className="text-[12px] text-ink-500">{u.email}</p>
                 <Badge tone={u.role === 'admin' ? 'warning' : 'neutral'} className="mt-1">
-                  {u.role}
+                  {ROLES[u.role] ?? u.role}
                 </Badge>
               </div>
             </div>
             {u.id !== user.id && (
               <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setUsuarioACambiarRol(u)}
-                  className="tap-scale flex h-9 w-9 items-center justify-center rounded-full text-ink-500 active:bg-ink-100"
-                  aria-label={u.role === 'admin' ? 'Quitar admin' : 'Hacer admin'}
+                <select
+                  value={u.role}
+                  onChange={(e) => setUsuarioACambiarRol({ ...u, nuevoRol: e.target.value })}
+                  aria-label={`Rol de ${u.nombre}`}
+                  className="h-9 rounded-lg border border-ink-200 bg-white px-2 text-[12.5px] text-ink-700 outline-none"
                 >
-                  {u.role === 'admin' ? <ShieldMinus size={16} /> : <ShieldPlus size={16} />}
-                </button>
+                  {Object.entries(ROLES).map(([valor, etiqueta]) => (
+                    <option key={valor} value={valor}>
+                      {etiqueta}
+                    </option>
+                  ))}
+                </select>
                 <button
                   onClick={() => setUsuarioAEliminar(u)}
                   className="tap-scale flex h-9 w-9 items-center justify-center rounded-full text-red-500 active:bg-red-50"
@@ -182,18 +199,10 @@ export default function Usuarios() {
 
       <ConfirmDialog
         open={!!usuarioACambiarRol}
-        icon={usuarioACambiarRol?.role === 'admin' ? ShieldMinus : ShieldPlus}
+        icon={ShieldCheck}
         variant="primary"
-        title={
-          usuarioACambiarRol?.role === 'admin'
-            ? `¿Quitarle el rol de admin a ${usuarioACambiarRol?.nombre}?`
-            : `¿Hacer admin a ${usuarioACambiarRol?.nombre}?`
-        }
-        description={
-          usuarioACambiarRol?.role === 'admin'
-            ? 'Pasará a ser secretario, sin acceso a gestión de usuarios ni presidentes.'
-            : 'Va a tener acceso completo, incluyendo gestión de usuarios y presidentes.'
-        }
+        title={`¿Cambiar a ${usuarioACambiarRol?.nombre} a ${ROLES[usuarioACambiarRol?.nuevoRol]}?`}
+        description={DESCRIPCION_ROL[usuarioACambiarRol?.nuevoRol]}
         confirmLabel="Confirmar"
         cancelLabel="Cancelar"
         onConfirm={handleCambiarRol}

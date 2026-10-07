@@ -244,3 +244,46 @@ create policy "programas_update_authenticated" on public.programas
 drop policy if exists "programas_delete_authenticated" on public.programas;
 create policy "programas_delete_authenticated" on public.programas
   for delete using (auth.role() = 'authenticated');
+
+-- =========================================================
+-- ROL "LECTOR": solo puede consultar, no crear/editar/eliminar
+-- (ejecutar en el SQL Editor; es seguro volver a correrlo)
+-- =========================================================
+alter table public.profiles drop constraint if exists profiles_role_check;
+alter table public.profiles
+  add constraint profiles_role_check check (role in ('admin', 'secretario', 'lector'));
+
+-- Helper: ¿el usuario actual puede escribir? (admin o secretario)
+create or replace function public.can_write()
+returns boolean as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role in ('admin', 'secretario')
+  );
+$$ language sql security definer stable set search_path = public;
+
+-- CITAS
+drop policy if exists "citas_insert_staff" on public.citas;
+create policy "citas_insert_staff" on public.citas
+  for insert with check (public.can_write());
+
+drop policy if exists "citas_update_staff" on public.citas;
+create policy "citas_update_staff" on public.citas
+  for update using (public.can_write());
+
+drop policy if exists "citas_delete_staff" on public.citas;
+create policy "citas_delete_staff" on public.citas
+  for delete using (public.can_write());
+
+-- PROGRAMAS
+drop policy if exists "programas_insert_authenticated" on public.programas;
+create policy "programas_insert_authenticated" on public.programas
+  for insert with check (public.can_write());
+
+drop policy if exists "programas_update_authenticated" on public.programas;
+create policy "programas_update_authenticated" on public.programas
+  for update using (public.can_write());
+
+drop policy if exists "programas_delete_authenticated" on public.programas;
+create policy "programas_delete_authenticated" on public.programas
+  for delete using (public.can_write());

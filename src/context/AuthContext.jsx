@@ -66,6 +66,8 @@ export function AuthProvider({ children }) {
     user: session?.user ?? null,
     profile,
     isAdmin: profile?.role === 'admin',
+    // El lector solo puede consultar; admin y secretario pueden crear y editar
+    canEdit: profile?.role === 'admin' || profile?.role === 'secretario',
     loading,
     signIn,
     signOut,

@@ -28,7 +28,7 @@ export default function App() {
       <Route
         path="/nueva-cita"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute editorOnly>
             <NuevaCita />
           </ProtectedRoute>
         }
@@ -36,7 +36,7 @@ export default function App() {
       <Route
         path="/citas/:id/editar"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute editorOnly>
             <EditarCita />
           </ProtectedRoute>
         }
@@ -93,7 +93,7 @@ export default function App() {
       <Route
         path="/programas/nuevo"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute editorOnly>
             <ProgramaEditor />
           </ProtectedRoute>
         }

@@ -16,7 +16,7 @@ import { proximoDiaEntrevistas } from '../lib/constants'
 export default function Agenda() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { isAdmin } = useAuth()
+  const { isAdmin, canEdit } = useAuth()
   const [fecha, setFecha] = useState(() => format(proximoDiaEntrevistas(), 'yyyy-MM-dd'))
   const [copiado, setCopiado] = useState(false)
   const [toastMsg, setToastMsg] = useState(() => location.state?.toast ?? null)
@@ -135,11 +135,12 @@ export default function Agenda() {
             key={presidente.id}
             presidente={presidente}
             citas={citasPorPresidente(presidente.id)}
-            onEditar={irAEditar}
-            onEstado={cambiarEstado}
+            onEditar={canEdit ? irAEditar : undefined}
+            onEstado={canEdit ? cambiarEstado : undefined}
           />
         ))}
 
+      {canEdit && (
       <button
         onClick={irACrear}
         className="tap-scale absolute bottom-24 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg active:bg-brand-700"
@@ -147,6 +148,7 @@ export default function Agenda() {
       >
         <Plus size={26} strokeWidth={2.5} />
       </button>
+      )}
 
       <Toast message={toastMsg} onDone={() => setToastMsg(null)} />
     </AppLayout>

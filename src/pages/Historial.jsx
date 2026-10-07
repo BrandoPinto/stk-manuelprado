@@ -11,6 +11,7 @@ import ErrorState from '../components/ui/ErrorState'
 import { Input, Select } from '../components/ui/Input'
 import { useHistorialCitas } from '../hooks/useCitas'
 import { usePresidentes } from '../hooks/usePresidentes'
+import { useAuth } from '../context/AuthContext'
 import { formatHora } from '../lib/constants'
 
 const POR_PAGINA = 15
@@ -22,6 +23,7 @@ function etiquetaFecha(fecha) {
 
 export default function Historial() {
   const navigate = useNavigate()
+  const { canEdit } = useAuth()
   const hoy = format(new Date(), 'yyyy-MM-dd')
 
   const [pagina, setPagina] = useState(0)
@@ -146,8 +148,8 @@ export default function Historial() {
                 {g.citas.map((c) => (
                   <Card
                     key={c.id}
-                    className="tap-scale cursor-pointer"
-                    onClick={() => navigate(`/citas/${c.id}/editar`, { state: { cita: c } })}
+                    className={canEdit ? 'tap-scale cursor-pointer' : ''}
+                    onClick={canEdit ? () => navigate(`/citas/${c.id}/editar`, { state: { cita: c } }) : undefined}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-[14px] font-semibold text-ink-900">{c.nombre_persona}</span>

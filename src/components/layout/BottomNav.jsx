@@ -13,8 +13,9 @@ const baseTabs = [
 const adminTab = { to: '/usuarios', label: 'Usuarios', icon: Users }
 
 export default function BottomNav() {
-  const { isAdmin } = useAuth()
-  const tabs = isAdmin ? [...baseTabs, adminTab] : baseTabs
+  const { isAdmin, canEdit } = useAuth()
+  const visibles = canEdit ? baseTabs : baseTabs.filter((t) => t.to !== '/nueva-cita')
+  const tabs = isAdmin ? [...visibles, adminTab] : visibles
 
   return (
     <nav className="safe-bottom sticky bottom-0 z-20 flex border-t border-ink-100 bg-white/95 shadow-nav backdrop-blur">

@@ -7,6 +7,7 @@ import Button from '../components/ui/Button'
 import { Field, Input } from '../components/ui/Input'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
+import { ROLES } from '../lib/constants'
 
 export default function Perfil() {
   const { user, profile, isAdmin, refreshProfile } = useAuth()
@@ -90,7 +91,7 @@ export default function Perfil() {
         <span className="flex h-16 w-16 items-center justify-center rounded-full bg-ink-900 text-white">
           <UserCircle size={32} />
         </span>
-        <Badge tone={isAdmin ? 'warning' : 'neutral'}>{isAdmin ? 'Admin' : 'Secretario'}</Badge>
+        <Badge tone={isAdmin ? 'warning' : 'neutral'}>{ROLES[profile?.role] ?? 'Secretario'}</Badge>
       </div>
 
       <Card className="mb-4">

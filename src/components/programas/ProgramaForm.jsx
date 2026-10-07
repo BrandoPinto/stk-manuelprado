@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { Plus, Trash2, X, FileDown } from 'lucide-react'
+import { Plus, Trash2, X, FileDown, Copy } from 'lucide-react'
 import { Field, Input, Select, Textarea } from '../ui/Input'
 import Button from '../ui/Button'
 import { TIPOS_REUNION } from '../../lib/constants'
@@ -40,6 +40,8 @@ export default function ProgramaForm({
   onSubmit,
   onEliminar,
   onExportar,
+  onDuplicar,
+  soloLectura = false,
   submitting,
   errorMsg,
 }) {
@@ -72,6 +74,7 @@ export default function ProgramaForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 pb-6">
+      <fieldset disabled={soloLectura} className="flex min-w-0 flex-col gap-4 border-0 p-0">
       <Field label="Reunión">
         <Select value={form.tipo} onChange={update('tipo')}>
           {TIPOS_REUNION.map((t) => (
@@ -152,19 +155,29 @@ export default function ProgramaForm({
         <Input value={form.ultima_oracion} onChange={update('ultima_oracion')} />
       </Field>
 
+      </fieldset>
+
       {errorMsg && (
         <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">{errorMsg}</p>
       )}
 
-      <Button type="submit" size="lg" loading={submitting} className="mt-2 w-full">
-        Guardar programa
-      </Button>
+      {!soloLectura && (
+        <Button type="submit" size="lg" loading={submitting} className="mt-2 w-full">
+          Guardar programa
+        </Button>
+      )}
 
       <Button type="button" variant="secondary" icon={FileDown} onClick={() => onExportar(form)} className="w-full">
         Exportar PDF
       </Button>
 
-      {onEliminar && (
+      {onDuplicar && (
+        <Button type="button" variant="secondary" icon={Copy} onClick={() => onDuplicar(form)} className="w-full">
+          Duplicar programa
+        </Button>
+      )}
+
+      {onEliminar && !soloLectura && (
         <Button type="button" variant="danger" icon={Trash2} onClick={onEliminar} className="w-full">
           Eliminar programa
         </Button>

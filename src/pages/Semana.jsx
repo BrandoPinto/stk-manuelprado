@@ -8,10 +8,12 @@ import Badge from '../components/ui/Badge'
 import ErrorState from '../components/ui/ErrorState'
 import { useCitasPorRango } from '../hooks/useCitas'
 import { formatHora } from '../lib/constants'
+import { useAuth } from '../context/AuthContext'
 import { ChevronLeft, ChevronRight, User } from 'lucide-react'
 
 export default function Semana() {
   const navigate = useNavigate()
+  const { canEdit } = useAuth()
   const [refDate, setRefDate] = useState(new Date())
 
   // Semana de lunes a domingo, mostrando principalmente martes/miércoles
@@ -104,8 +106,9 @@ export default function Semana() {
                         .map((c) => (
                           <button
                             key={c.id}
+                            disabled={!canEdit}
                             onClick={() => navigate(`/citas/${c.id}/editar`, { state: { cita: c } })}
-                            className="tap-scale flex items-center justify-between rounded-lg bg-ink-50 px-2.5 py-2 text-left"
+                            className={`${canEdit ? 'tap-scale' : 'cursor-default'} flex items-center justify-between rounded-lg bg-ink-50 px-2.5 py-2 text-left`}
                           >
                             <span className="text-[13px] text-ink-700">
                               <strong className="font-semibold">{formatHora(c.hora)}</strong> · {c.nombre_persona}

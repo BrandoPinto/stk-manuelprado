@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { Trash2 } from 'lucide-react'
+import { plantillaDesde } from '../lib/programaPlantilla'
 import AppLayout from '../components/layout/AppLayout'
 import ProgramaForm from '../components/programas/ProgramaForm'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
@@ -13,7 +14,11 @@ import { exportarProgramaPdf } from '../lib/programaPdf'
 export default function ProgramaEditor() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const location = useLocation()
+  const { user, canEdit } = useAuth()
+  const soloLectura = !!id && !canEdit
+  // Al duplicar, el programa llega por state y se abre como uno nuevo
+  const plantilla = !id ? location.state?.plantilla : undefined
   const { crear, actualizar, eliminar } = useProgramaMutations()
   const { data: programa, isLoading, isError, refetch } = usePrograma(id)
   const [errorMsg, setErrorMsg] = useState('')
@@ -48,7 +53,7 @@ export default function ProgramaEditor() {
     }
   }
 
-  const titulo = id ? 'Editar programa' : 'Nuevo programa'
+  const titulo = soloLectura ? 'Programa' : id ? 'Editar programa' : plantilla ? 'Duplicar programa' : 'Nuevo programa'
 
   if (id && isError) {
     return (
@@ -71,7 +76,14 @@ export default function ProgramaEditor() {
   return (
     <AppLayout title={titulo} onBack={true}>
       <ProgramaForm
-        initialValues={programa}
+        key={location.key}
+        initialValues={programa ?? plantilla}
+        soloLectura={soloLectura}
+        onDuplicar={
+          id && canEdit
+            ? (form) => navigate('/programas/nuevo', { state: { plantilla: plantillaDesde(form) } })
+            : undefined
+        }
         onSubmit={handleSubmit}
         onExportar={handleExportar}
         onEliminar={id ? () => setConfirmandoEliminar(true) : undefined}

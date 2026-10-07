@@ -34,7 +34,7 @@ export default function PresidenteCard({ presidente, citas, onEditar, onEstado }
               key={cita.id}
               hora={formatHora(cita.hora)}
               cita={cita}
-              onEditar={() => onEditar(cita)}
+              onEditar={onEditar ? () => onEditar(cita) : undefined}
               onEstado={onEstado}
             />
           ))}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Plus, FileDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, FileDown, Copy, ChevronLeft, ChevronRight } from 'lucide-react'
 import Button from '../components/ui/Button'
 import AppLayout from '../components/layout/AppLayout'
 import Card from '../components/ui/Card'
@@ -9,6 +9,8 @@ import ErrorState from '../components/ui/ErrorState'
 import Toast from '../components/ui/Toast'
 import { Select } from '../components/ui/Input'
 import { useProgramas } from '../hooks/useProgramas'
+import { useAuth } from '../context/AuthContext'
+import { plantillaDesde } from '../lib/programaPlantilla'
 import { TIPOS_REUNION } from '../lib/constants'
 import { exportarProgramaPdf, formatFechaPrograma } from '../lib/programaPdf'
 
@@ -16,6 +18,7 @@ const POR_PAGINA = 10
 
 export default function Programas() {
   const navigate = useNavigate()
+  const { canEdit } = useAuth()
   const location = useLocation()
   const [tipo, setTipo] = useState('todos')
   const [toastMsg, setToastMsg] = useState(() => location.state?.toast ?? null)
@@ -43,6 +46,11 @@ export default function Programas() {
     if (location.state?.toast) navigate(location.pathname, { replace: true, state: {} })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const duplicar = (e, programa) => {
+    e.stopPropagation()
+    navigate('/programas/nuevo', { state: { plantilla: plantillaDesde(programa) } })
+  }
 
   const exportar = async (e, programa) => {
     e.stopPropagation()
@@ -112,13 +120,24 @@ export default function Programas() {
                     </p>
                   )}
                 </div>
-                <button
-                  onClick={(e) => exportar(e, p)}
-                  aria-label="Exportar PDF"
-                  className="tap-scale flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ink-500 active:bg-ink-100"
-                >
-                  <FileDown size={18} />
-                </button>
+                <div className="flex shrink-0 items-center">
+                  {canEdit && (
+                    <button
+                      onClick={(e) => duplicar(e, p)}
+                      aria-label="Duplicar programa"
+                      className="tap-scale flex h-9 w-9 items-center justify-center rounded-full text-ink-500 active:bg-ink-100"
+                    >
+                      <Copy size={17} />
+                    </button>
+                  )}
+                  <button
+                    onClick={(e) => exportar(e, p)}
+                    aria-label="Exportar PDF"
+                    className="tap-scale flex h-9 w-9 items-center justify-center rounded-full text-ink-500 active:bg-ink-100"
+                  >
+                    <FileDown size={18} />
+                  </button>
+                </div>
               </div>
               {(p.relevos != null || p.sostenimientos != null) && (
                 <div className="mt-2 flex gap-1.5">
@@ -148,6 +167,7 @@ export default function Programas() {
         </div>
       )}
 
+      {canEdit && (
       <button
         onClick={() => navigate('/programas/nuevo')}
         className="tap-scale absolute bottom-24 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg active:bg-brand-700"
@@ -155,6 +175,7 @@ export default function Programas() {
       >
         <Plus size={26} strokeWidth={2.5} />
       </button>
+      )}
 
       <Toast message={toastMsg} onDone={() => setToastMsg(null)} />
     </AppLayout>

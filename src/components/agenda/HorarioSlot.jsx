@@ -11,11 +11,11 @@ export default function HorarioSlot({ hora, cita, onEditar, onEstado }) {
 
   return (
     <div
-      role="button"
-      tabIndex={0}
+      role={onEditar ? 'button' : undefined}
+      tabIndex={onEditar ? 0 : undefined}
       onClick={onEditar}
-      onKeyDown={(e) => e.key === 'Enter' && onEditar()}
-      className="tap-scale flex w-full flex-col gap-1.5 rounded-lg border border-blue-200 bg-ocupado-50 px-3 py-2.5 cursor-pointer text-left"
+      onKeyDown={(e) => e.key === 'Enter' && onEditar?.()}
+      className={`${onEditar ? 'tap-scale cursor-pointer' : ''} flex w-full flex-col gap-1.5 rounded-lg border border-blue-200 bg-ocupado-50 px-3 py-2.5 text-left`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
