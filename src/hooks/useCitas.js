@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { supabase } from '../lib/supabaseClient'
 
 const baseKey = ['citas']
@@ -16,7 +16,7 @@ export function useCitasPorFecha(fecha) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('citas')
-        .select('*, presidentes(id, nombre, activo)')
+        .select('*, presidentes(id, nombre, activo), creador:profiles!creado_por(nombre)')
         .eq('fecha', fecha)
         .order('hora', { ascending: true })
       if (error) throw error
@@ -57,7 +57,7 @@ export function useCitasPorRango(fechaInicio, fechaFin) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('citas')
-        .select('*, presidentes(id, nombre, activo)')
+        .select('*, presidentes(id, nombre, activo), creador:profiles!creado_por(nombre)')
         .gte('fecha', fechaInicio)
         .lte('fecha', fechaFin)
         .order('fecha', { ascending: true })
@@ -82,6 +82,38 @@ export function useCitasPorRango(fechaInicio, fechaFin) {
   }, [fechaInicio, fechaFin, queryClient])
 
   return query
+}
+
+/**
+ * Historial paginado en el servidor: citas hasta `hasta` (inclusive), de la
+ * más reciente a la más antigua, con filtros opcionales.
+ * Devuelve { citas, total }.
+ */
+export function useHistorialCitas({ hasta, pagina, porPagina, busqueda, presidenteId, modalidad, estado }) {
+  return useQuery({
+    queryKey: [...baseKey, 'historial', hasta, pagina, porPagina, busqueda, presidenteId, modalidad, estado],
+    placeholderData: keepPreviousData,
+    queryFn: async () => {
+      let q = supabase
+        .from('citas')
+        .select('*, presidentes(id, nombre, activo), creador:profiles!creado_por(nombre)', { count: 'exact' })
+        .lte('fecha', hasta)
+        .order('fecha', { ascending: false })
+        .order('hora', { ascending: false })
+        .range(pagina * porPagina, pagina * porPagina + porPagina - 1)
+
+      // Se quitan los caracteres con significado especial en filtros PostgREST
+      const termino = busqueda.trim().replace(/[%,()*\\]/g, ' ')
+      if (termino) q = q.or(`nombre_persona.ilike.%${termino}%,barrio.ilike.%${termino}%`)
+      if (presidenteId !== 'todos') q = q.eq('presidente_id', presidenteId)
+      if (modalidad !== 'todas') q = q.eq('modalidad', modalidad)
+      if (estado !== 'todos') q = q.eq('estado', estado)
+
+      const { data, error, count } = await q
+      if (error) throw error
+      return { citas: data, total: count ?? 0 }
+    },
+  })
 }
 
 export function useCitaMutations() {

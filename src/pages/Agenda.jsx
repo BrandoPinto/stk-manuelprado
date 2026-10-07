@@ -8,7 +8,7 @@ import PresidenteCard from '../components/agenda/PresidenteCard'
 import ErrorState from '../components/ui/ErrorState'
 import Toast from '../components/ui/Toast'
 import { usePresidentes } from '../hooks/usePresidentes'
-import { useCitasPorFecha } from '../hooks/useCitas'
+import { useCitasPorFecha, useCitaMutations } from '../hooks/useCitas'
 import { useAuth } from '../context/AuthContext'
 import { construirTextoAgendaWhatsApp, copiarAlPortapapeles } from '../lib/whatsapp'
 import { proximoDiaEntrevistas } from '../lib/constants'
@@ -40,6 +40,14 @@ export default function Agenda() {
     isError: errorCitas,
     refetch: refetchCitas,
   } = useCitasPorFecha(fecha)
+
+  const { actualizar } = useCitaMutations()
+  const cambiarEstado = (cita, estado) => {
+    actualizar.mutate(
+      { id: cita.id, estado },
+      { onError: (err) => setToastMsg(err.message || 'No se pudo guardar el estado') }
+    )
+  }
 
   const citasPorPresidente = (presidenteId) =>
     (citas ?? []).filter((c) => c.presidente_id === presidenteId)
@@ -128,6 +136,7 @@ export default function Agenda() {
             presidente={presidente}
             citas={citasPorPresidente(presidente.id)}
             onEditar={irAEditar}
+            onEstado={cambiarEstado}
           />
         ))}
 

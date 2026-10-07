@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { CalendarDays, PlusCircle, CalendarRange, History, Users } from 'lucide-react'
+import { CalendarDays, PlusCircle, CalendarRange, History, Users, ScrollText } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
 const baseTabs = [
@@ -7,6 +7,7 @@ const baseTabs = [
   { to: '/nueva-cita', label: 'Nueva cita', icon: PlusCircle },
   { to: '/semana', label: 'Semana', icon: CalendarRange },
   { to: '/historial', label: 'Historial', icon: History },
+  { to: '/programas', label: 'Programas', icon: ScrollText },
 ]
 
 const adminTab = { to: '/usuarios', label: 'Usuarios', icon: Users }

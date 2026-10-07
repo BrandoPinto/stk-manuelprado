@@ -59,6 +59,13 @@ create index if not exists idx_citas_presidente on public.citas (presidente_id);
 alter table public.citas add column if not exists celular text;
 
 -- ---------------------------------------------------------
+-- MIGRACIÓN: control de asistencia (se dio / no se dio la entrevista)
+-- ---------------------------------------------------------
+alter table public.citas
+  add column if not exists estado text not null default 'pendiente'
+  check (estado in ('pendiente', 'realizada', 'no_realizada'));
+
+-- ---------------------------------------------------------
 -- FUNCION: crear profile automáticamente al registrar usuario
 -- ---------------------------------------------------------
 create or replace function public.handle_new_user()
@@ -185,3 +192,55 @@ on conflict do nothing;
 -- la app y luego ejecuta:
 -- update public.profiles set role = 'admin' where email = 'tu-correo@ejemplo.com';
 -- ---------------------------------------------------------
+
+-- =========================================================
+-- PROGRAMAS DE REUNIONES
+-- (ejecutar en el SQL Editor; es seguro volver a correrlo)
+-- =========================================================
+create table if not exists public.programas (
+  id uuid primary key default uuid_generate_v4(),
+  tipo text not null check (tipo in (
+    'Consejo de Estaca',
+    'Consejo de Obispos',
+    'Reunión de Sumo Consejo de Estaca',
+    'Reunión de Presidencia'
+  )),
+  fecha date not null,
+  preside text not null default '',
+  dirige text not null default '',
+  himno_inicial text not null default '',
+  primera_oracion text not null default '',
+  pensamiento text not null default '',
+  anuncios text not null default '',
+  -- lista de textos, uno por tiempo (pueden ser más o menos)
+  tiempos jsonb not null default '[]'::jsonb,
+  -- null = la sección no se usa en esta reunión; texto = habilitada
+  relevos text,
+  sostenimientos text,
+  ultima_oracion text not null default '',
+  creado_por uuid references public.profiles(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+-- MIGRACIÓN: si la tabla programas ya existía sin la 1era oración
+alter table public.programas add column if not exists primera_oracion text not null default '';
+
+create index if not exists idx_programas_fecha on public.programas (fecha desc);
+
+alter table public.programas enable row level security;
+
+drop policy if exists "programas_select_authenticated" on public.programas;
+create policy "programas_select_authenticated" on public.programas
+  for select using (auth.role() = 'authenticated');
+
+drop policy if exists "programas_insert_authenticated" on public.programas;
+create policy "programas_insert_authenticated" on public.programas
+  for insert with check (auth.role() = 'authenticated');
+
+drop policy if exists "programas_update_authenticated" on public.programas;
+create policy "programas_update_authenticated" on public.programas
+  for update using (auth.role() = 'authenticated');
+
+drop policy if exists "programas_delete_authenticated" on public.programas;
+create policy "programas_delete_authenticated" on public.programas
+  for delete using (auth.role() = 'authenticated');

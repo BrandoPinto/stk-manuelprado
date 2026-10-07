@@ -4,7 +4,7 @@ import Badge from '../ui/Badge'
 import HorarioSlot from './HorarioSlot'
 import { formatHora } from '../../lib/constants'
 
-export default function PresidenteCard({ presidente, citas, onEditar }) {
+export default function PresidenteCard({ presidente, citas, onEditar, onEstado }) {
   const ordenadas = [...citas].sort((a, b) => formatHora(a.hora).localeCompare(formatHora(b.hora)))
 
   return (
@@ -35,6 +35,7 @@ export default function PresidenteCard({ presidente, citas, onEditar }) {
               hora={formatHora(cita.hora)}
               cita={cita}
               onEditar={() => onEditar(cita)}
+              onEstado={onEstado}
             />
           ))}
         </div>

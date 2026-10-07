@@ -23,6 +23,16 @@ export const BARRIOS = [
 
 export const PREFIJO_CELULAR = '+51'
 
+// Aparece en el encabezado y pie de los PDF de programas
+export const NOMBRE_ESTACA = 'Estaca Manuel Prado'
+
+export const TIPOS_REUNION = [
+  'Consejo de Estaca',
+  'Consejo de Obispos',
+  'Reunión de Sumo Consejo de Estaca',
+  'Reunión de Presidencia',
+]
+
 export const MODALIDADES = [
   { value: 'presencial', label: 'Presencial' },
   { value: 'virtual', label: 'Virtual' },

@@ -9,6 +9,8 @@ import Historial from './pages/Historial'
 import Usuarios from './pages/Usuarios'
 import Presidentes from './pages/Presidentes'
 import Perfil from './pages/Perfil'
+import Programas from './pages/Programas'
+import ProgramaEditor from './pages/ProgramaEditor'
 
 export default function App() {
   return (
@@ -76,6 +78,31 @@ export default function App() {
         element={
           <ProtectedRoute>
             <Perfil />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/programas"
+        element={
+          <ProtectedRoute>
+            <Programas />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/programas/nuevo"
+        element={
+          <ProtectedRoute>
+            <ProgramaEditor />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/programas/:id/editar"
+        element={
+          <ProtectedRoute>
+            <ProgramaEditor />
           </ProtectedRoute>
         }
       />
